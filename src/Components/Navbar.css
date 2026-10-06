@@ -1,0 +1,72 @@
+.topbarcontainer {
+    height: 70px;
+    width: 100%;
+    background-color: rgba(16, 34, 46, 1);
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+.title {
+    flex: 1;
+    color: rgb(0, 255, 255);
+    font-size: 24px;
+    margin-left: 5px;
+    margin-right: 20px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.navbuttons {
+    font-size: 18px;
+    font-weight: 500;
+    font-style: italic;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    flex: 1;
+    background-color: rgba(16, 34, 46, 1);
+    margin-right: 50px;
+    cursor: pointer;
+    border-radius: 10px;
+    height: 40px;
+    color: rgba(182, 246, 255, 1);
+    box-shadow: -2px 2px 7px -3px rgba(182, 246, 255, 1);
+    border-width: 2px;
+    border-color: rgba(182, 246, 255, 1);
+    border-style: solid;
+    transition: all 0.15s ease-in-out;
+}
+
+.navbuttons:hover {
+    background-color: rgb(3, 51, 60);
+    transform: scale(1.1);
+
+}
+
+.navbuttons:active {
+    background-color: aqua;
+}
+
+.id {
+    flex: 0.5;
+    margin-left: 50px;
+    font-weight: bold;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    font-size: 17px;
+}
+
+.changecolour {
+    background-color: rgb(8, 123, 143);
+}
+
+.logo {
+    margin-top: 20px;
+    width: 70px;
+    height: 70px;
+}
+
+

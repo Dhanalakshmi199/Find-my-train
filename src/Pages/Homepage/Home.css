@@ -1,0 +1,86 @@
+.container {
+    height: 100vh;
+    width: 100vw;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    
+}
+
+.middle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: rgb(3, 68, 112);
+    width: 20px;
+    height: 20px;
+    border-radius: 70%;
+    animation-name: ani1;
+    animation-duration: 0.3s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-in-out;
+}
+
+@keyframes ani1 {
+    to {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0%;
+    }
+}
+
+.b {
+    background-color:rgba(16, 34, 46, 1) ;
+    border-color:rgba(182, 246, 255, 1) ;
+    border-radius: 40px;
+    border-style: solid;
+    font-weight: bold;
+    font-size:25px;
+    font-style:normal;
+     color:rgba(182, 246, 255, 1);
+    margin-bottom: 55px;
+   
+    box-shadow:  -0px 0px 7px 3px  rgba(182, 246, 255, 1);
+    border-width: 4px;
+    animation-name: ani2;
+    animation-duration: 0.3s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-in-out;
+    transition: all 0.2s ease-in-out;
+}
+
+@keyframes ani2 {
+    from {
+        width: 10px;
+        height: 10px;
+    }
+
+    to {
+        width: 650px;
+        height: 100px;
+    }
+
+}
+
+.btn {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.b:hover {
+    background-color: rgb(3, 51, 60);
+    cursor: pointer;
+    transform: scale(1.1);
+}
+
+.b:active {
+    background-color: aqua;
+}

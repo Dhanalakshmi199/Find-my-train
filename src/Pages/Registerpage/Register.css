@@ -1,0 +1,148 @@
+.registerclass {
+  width: 100vw;
+  height: 100vh;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+.y {
+  height: 150px;
+}
+.registerbox {
+  background-color: rgba(16, 34, 46, 0.8);
+  margin-left: 900px;
+  height: 420px;
+  width: 400px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-color: rgb(93, 177, 188);
+  border-width: 3px;
+  border-style: solid;
+  box-shadow: 0px 0px 20px 4px black;
+}
+.name {
+  margin-top: 40px;
+  margin-bottom: 20px;
+}
+.nametext {
+  color: rgb(8, 184, 207);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  word-spacing: 2px;
+  font-size: 19px;
+}
+.usernamebox {
+  border-radius: 6px;
+  border: none;
+  margin-top: 5px;
+  width: 290px;
+  height: 40px;
+  padding-left: 10px;
+  box-shadow: 0px 2px 5px 0px rgb(0, 0, 0);
+  border-width: 2px;
+  border-color: rgb(93, 177, 188);
+  border-style: solid;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+  font-weight: 600;
+  font-size: 15px;
+  background-color: rgba(16, 34, 46, 1);
+  color: rgb(93, 177, 188);
+}
+.usernamebox:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+  outline: none;
+}
+.rmail {
+  margin-bottom: 20px;
+}
+.rmailidtext {
+  color: rgb(8, 184, 207);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  word-spacing: 2px;
+  font-size: 19px;
+}
+.rmailidbox {
+  border-radius: 6px;
+  border: none;
+  margin-top: 5px;
+  width: 290px;
+  height: 40px;
+  padding-left: 10px;
+  box-shadow: 0px 2px 5px 0px rgb(0, 0, 0);
+  border-width: 2px;
+  border-color: rgb(93, 177, 188);
+  border-style: solid;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+  font-weight: 600;
+  font-size: 15px;
+  background-color: rgba(16, 34, 46, 1);
+  color: rgb(93, 177, 188);
+}
+.rmailidbox:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+  outline: none;
+}
+.rpass {
+  margin-bottom: 15px;
+}
+.rpasstxt {
+  color: rgb(8, 184, 207);
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  word-spacing: 2px;
+  font-size: 19px;
+}
+.rpassbox {
+  border: none;
+  margin-top: 5px;
+  height: 40px;
+  padding-left: 10px;
+  width: 290px;
+  background-color: rgba(16, 34, 46, 1);
+  border-radius: 6px;
+  box-shadow: 0px 2px 5px 0px rgb(0, 0, 0);
+  border-width: 2px;
+  border-color: rgb(93, 177, 188);
+  border-style: solid;
+  font-weight: 600;
+  font-size: 15px;
+  color: rgb(93, 177, 188);
+  outline: none;
+  transition: all 0.15s ease-in-out;
+}
+.rpassbox:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+  outline: none;
+}
+.registerbtn {
+  width: 308px;
+  height: 40px;
+  margin-top: 40px;
+  margin-bottom: 20px;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+  background-image: linear-gradient(90deg, rgb(228, 98, 6), rgb(5, 130, 161));
+  border-radius: 3px;
+  box-shadow: 0px 2px 5px 0px rgb(0, 0, 0);
+  border-width: 1px;
+  border-color: rgb(93, 177, 188);
+  border-style: solid;
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: 2px;
+  word-spacing: 3px;
+  color: rgb(0, 0, 0);
+}
+.registerbtn:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+  outline: none;
+}
