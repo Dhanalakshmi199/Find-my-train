@@ -1,13 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import "./Navbar.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import {  signOut } from "firebase/auth";
 import auth from "../firebaseconfig/firebase";
 import { Logout } from "@mui/icons-material";
 
-export default function Navbar({ curpage }) {
-  // const auth = getAuth();
-  const [gotopage, setgotopage] = useState(curpage);
+export default function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
   const buttonClassName =
@@ -36,8 +34,7 @@ export default function Navbar({ curpage }) {
           className={`findmytrain ${buttonClassName} navbuttons`}
           id="fmt"
           onClick={() => {
-            setgotopage("track");
-            navigate("/livelocation", { gotopage });
+            navigate("/livelocation");
           }}
         >
           Spot My Train
@@ -46,8 +43,7 @@ export default function Navbar({ curpage }) {
         <button
           className={`tbstations ${buttonClassName1} navbuttons`}
           onClick={() => {
-            setgotopage("tbstsns");
-            navigate("/trainsbetweenstations", { gotopage });
+            navigate("/trainsbetweenstations");
           }}
         >
           Trains between Stations
@@ -56,8 +52,7 @@ export default function Navbar({ curpage }) {
         <button
           className={`tschedule ${buttonClassName2} navbuttons`}
           onClick={() => {
-            setgotopage("tschedule");
-            navigate("/trainschedule", { gotopage });
+            navigate("/trainschedule");
           }}
         >
           Train's Schedule

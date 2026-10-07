@@ -9,9 +9,13 @@
 }
 .loginbox {
   background-color: rgba(16, 34, 46, 0.8);
-  margin-left: 900px;
-  height: 420px;
+  margin-left: auto;
+  margin-right: 8%;
+  min-height: 440px;
+  height: auto;
+  padding: 20px 0;
   width: 400px;
+  max-width: 90%;
   border-radius: 10px;
   display: flex;
   flex-direction: column;

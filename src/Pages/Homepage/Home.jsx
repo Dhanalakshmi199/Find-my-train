@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React from "react";
 import "./Home.css";
 import { useNavigate } from "react-router-dom";
 export default function Home() {
-  const [curpage, setcurpage] = useState(null);
   const navigate = useNavigate();
   return (
     <>
@@ -13,8 +12,7 @@ export default function Home() {
               type="button"
               className="b"
               onClick={() => {
-                setcurpage("track");
-                navigate("/livelocation", { curpage });
+                navigate("/livelocation");
               }}
             >
               View Train's Location
@@ -23,8 +21,7 @@ export default function Home() {
               type="button"
               className="b"
               onClick={() => {
-                setcurpage("tbstsns");
-                navigate("/trainsbetweenstations", { curpage });
+                navigate("/trainsbetweenstations");
               }}
             >
               View Trains Between Stations
@@ -33,8 +30,7 @@ export default function Home() {
               type="button"
               className="b"
               onClick={() => {
-                setcurpage("tschedule");
-                navigate("/trainschedule", { curpage });
+                navigate("/trainschedule");
               }}
             >
               View Train's Schedule

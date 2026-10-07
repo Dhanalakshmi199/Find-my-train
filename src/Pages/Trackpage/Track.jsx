@@ -15,9 +15,6 @@ import axios from "axios";
 
 export default function Track({ curpage }) {
   const [animation, setAnimation] = useState(false);
-  function handleSubmit(event) {
-    event.preventDefault();
-  }
   const dotRef = useRef(null);
   const handleButtonClick = () => {
     if (dotRef.current) {
@@ -32,32 +29,37 @@ export default function Track({ curpage }) {
     }
   };
 
-  const getlivetraindata = (event) => {
-    event.preventDefault();
-      const options = {
-        method: "GET",
-        url: "https://irctc1.p.rapidapi.com/api/v1/liveTrainStatus",
-        params: { trainNo: trainnumber, startDay: travelday },
-        headers: {
-          "X-RapidAPI-Key":
-            "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
-          "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
-        },
-      };
-      axios
-        .request(options)
-        .then(function (response) {
-          console.log(response.data);
-          setds(response.data);
-        })
-        .catch(function (error) {
-          seterror(true);
-          console.error(error);
-        });
-  };
+  const [loading, setLoading] = useState(false);
   const [refresh, setrefresh] = useState(false);
-  const [ds,setds]=useState({});
+  const [ds, setds] = useState({});
   const [error, seterror] = useState(false);
+
+  const getlivetraindata = (event) => {
+    if (event) event.preventDefault();
+    setLoading(true);
+    seterror(false);
+    const options = {
+      method: "GET",
+      url: "https://irctc1.p.rapidapi.com/api/v1/liveTrainStatus",
+      params: { trainNo: trainnumber, startDay: travelday },
+      headers: {
+        "X-RapidAPI-Key":
+          "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
+        "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
+      },
+    };
+    axios
+      .request(options)
+      .then(function (response) {
+        setds(response.data);
+        setLoading(false);
+      })
+      .catch(function (error) {
+        seterror(true);
+        setLoading(false);
+        console.error(error);
+      });
+  };
   const [validsearch, setvalidsearch] = useState(false);
   const [trainsugg, settrainsugg] = useState([]);
   const [traindata, settraindata] = useState("");
@@ -106,41 +108,48 @@ export default function Track({ curpage }) {
 
   // const [ref, inView] = useInView();
   const [icon, setIcon] = useState(<ArrowDownwardIcon className="down" />);
-const handleScroll = () => {
-  if (dotRef.current) {
-    const dotRect = dotRef.current.getBoundingClientRect();
-    const viewportMidpoint = window.innerHeight / 2;
-    const dotMidpoint = dotRect.top + dotRect.height / 2;
-    const distanceFromViewportMidpoint = Math.abs(
-      viewportMidpoint - dotMidpoint
-    );
 
-    if (distanceFromViewportMidpoint < 50) {
-      refresh !== true && setrefresh(true);
-      setIcon(<RefreshIcon className="refresh" />);
-    } else if (dotMidpoint < viewportMidpoint) {
-      refresh !== false && setrefresh(false);
-      setIcon(<ArrowUpwardIcon className="up" />);
-    } else {
-      refresh !== false && setrefresh(false);
-      setIcon(<ArrowDownwardIcon className="down" />);
-    }
-  }
-};
+  useEffect(() => {
+    const handleScroll = () => {
+      if (dotRef.current) {
+        const dotRect = dotRef.current.getBoundingClientRect();
+        const viewportMidpoint = window.innerHeight / 2;
+        const dotMidpoint = dotRect.top + dotRect.height / 2;
+        const distanceFromViewportMidpoint = Math.abs(
+          viewportMidpoint - dotMidpoint
+        );
 
-window.addEventListener("scroll", handleScroll);
+        if (distanceFromViewportMidpoint < 50) {
+          setrefresh(true);
+          setIcon(<RefreshIcon className="refresh" />);
+        } else if (dotMidpoint < viewportMidpoint) {
+          setrefresh(false);
+          setIcon(<ArrowUpwardIcon className="up" />);
+        } else {
+          setrefresh(false);
+          setIcon(<ArrowDownwardIcon className="down" />);
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   const { speak } = useSpeechSynthesis();
   const handlevoiceButtonClick = () => {
+    if (!ds?.data?.current_location_info) return;
     const delayMessages = ds.data.current_location_info
       .filter((info) => info.type === 1)
-      .map((info) => `${info.readable_message} with a  ${info.hint} `);
+      .map((info) => `${info.readable_message} with a ${info.hint}`);
 
     const delayMessage = delayMessages.join(", ");
 
     speak(
       new SpeechSynthesisUtterance(
-        `${ds.data.seo_train_name} has ${delayMessage}`.replace(
+        `${ds.data.seo_train_name || "Train"} has ${delayMessage}`.replace(
           /m\b/g,
           "minutes"
         )
@@ -166,29 +175,33 @@ window.addEventListener("scroll", handleScroll);
         </div>
         <div className={`anipage2 ${animation ? "animated8311" : ""}`}>
           <div className={`trackdata ${animation ? "animated8331" : ""}`}>
-            {issearched && error && (
-              <div className="msg">An error occured,please try again later</div>
+            {issearched && loading && (
+              <div className="msg">Loading live train status...</div>
             )}
-            {issearched && !error && (
+            {issearched && !loading && error && (
+              <div className="msg">An error occurred, please try again later</div>
+            )}
+            {issearched && !loading && !error && (
               <div className="">
-                <div className="msg">{ds.status === false && ds.message}</div>
+                <div className="msg">{ds?.status === false && ds?.message}</div>
                 <div className="msg">
-                  {ds.status === true &&
-                    ds.data.at_src_dstn === true &&
-                    (ds.data.at_src === true
+                  {ds?.status === true &&
+                    ds?.data?.at_src_dstn === true &&
+                    (ds?.data?.at_src === true
                       ? "The train is not started yet"
-                      : "The train has reached it's destination")}
+                      : "The train has reached its destination")}
                 </div>
                 <div className="">
-                  {ds.status === true && ds.data.at_src_dstn === false && (
+                  {ds?.status === true && ds?.data && ds.data.at_src_dstn === false && (
                     <div className="trackdata1">
                       <div className="tracktrainname">
                         {ds.data.train_number} - {ds.data.seo_train_name}
                       </div>
                       <div className="trdata">
                         <div className="vertrow">
-                          {ds.data.previous_stations.map((item) => (
+                          {ds.data.previous_stations.map((item, idx) => (
                             <div
+                              key={item.station_code || idx}
                               className="trackdata2"
                               onClick={() => {
                                 setwantspal(!wantspal);
@@ -417,8 +430,9 @@ window.addEventListener("scroll", handleScroll);
                         </div>
 
                         <div className="">
-                          {ds.data.upcoming_stations.map((item) => (
+                          {ds.data.upcoming_stations.map((item, idx) => (
                             <div
+                              key={item.station_code || idx}
                               className="trackdata2"
                               onClick={() => {
                                 setwantspal(!wantspal);
@@ -592,23 +606,19 @@ window.addEventListener("scroll", handleScroll);
           </div>
         </div>
         <div
-          onSubmit={handleSubmit}
           className={`Trackpage ${animation ? "animated1" : ""}`}
         >
           <div
-            onSubmit={handleSubmit}
             className={`text1 ${animation ? "animated5" : ""}`}
           >
             Enter Train number or Train name :
           </div>
           <div
-            onSubmit={handleSubmit}
             className={`trackform ${animation ? "animated2" : ""}`}
             role="search"
-            autocomplete="off"
+            autoComplete="off"
           >
             <div
-              onSubmit={handleSubmit}
               className={`col ${animation ? "animated3" : ""}`}
             >
               <div className="stick">
@@ -669,7 +679,6 @@ window.addEventListener("scroll", handleScroll);
               </select>
             </div>
             <button
-              onSubmit={handleSubmit}
               className={`trainsubmitbutton ${animation ? "animated4" : ""}`}
               type="submit"
               onClick={(event) => {

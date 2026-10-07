@@ -9,9 +9,13 @@
 }
 .registerbox {
   background-color: rgba(16, 34, 46, 0.8);
-  margin-left: 900px;
-  height: 420px;
+  margin-left: auto;
+  margin-right: 8%;
+  min-height: 440px;
+  height: auto;
+  padding: 20px 0;
   width: 400px;
+  max-width: 90%;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -145,4 +149,32 @@
   transform: scale(1.1);
   cursor: pointer;
   outline: none;
+}
+.signupbtn {
+  width: 308px;
+  height: 40px;
+  margin-bottom: 20px;
+  transition: all 0.15s ease-in-out;
+  outline: none;
+  background-image: linear-gradient(90deg, rgb(228, 98, 6), rgb(5, 130, 161));
+  border-radius: 3px;
+  box-shadow: 0px 2px 5px 0px rgb(0, 0, 0);
+  border-width: 1px;
+  border-color: rgb(93, 177, 188);
+  border-style: solid;
+  font-weight: 900;
+  font-size: 19px;
+  letter-spacing: 2px;
+  word-spacing: 3px;
+  color: rgb(0, 0, 0);
+}
+.signupbtn:hover {
+  transform: scale(1.1);
+  cursor: pointer;
+  outline: none;
+}
+.invalid {
+  color: red;
+  font-weight: 900;
+  text-align: center;
 }

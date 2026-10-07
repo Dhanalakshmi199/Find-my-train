@@ -19,6 +19,7 @@ function App() {
             <Route path="/trainschedule" element={<Tschedule />} />
             <Route path="/" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="*" element={<Login />} />
           </Routes>
         </BrowserRouter>
       </div>

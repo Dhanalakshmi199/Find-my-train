@@ -8,18 +8,26 @@ import { useNavigate } from "react-router-dom";
 export default function Register() {
   const [mailid, setmailid] = useState("");
   const [password, setpassword] = useState("");
- const navigate = useNavigate();
-  const HandleSignup=async(e)=>{
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const HandleSignup = async (e) => {
     e.preventDefault();
+    if (!mailid || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+    setError("");
     createUserWithEmailAndPassword(auth, mailid, password)
-      .then(async(userCredential) => {
-        console.log(userCredential);
-        navigate("/home")
+      .then((userCredential) => {
+        navigate("/home");
       })
-      .catch((error) => {
-        console.log(error);
+      .catch((err) => {
+        console.error(err);
+        const msg = err.code ? err.code.replace("auth/", "").replace(/-/g, " ") : err.message;
+        setError(msg);
       });
-  }
+  };
 
   return (
     <>
@@ -29,54 +37,63 @@ export default function Register() {
       >
         <div className="y"></div>
         <div className="registerbox">
-          {/* <div className="name">
-            <span className="nametext">Enter User Name</span>
+          <form onSubmit={HandleSignup} style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+            <div className="rmail">
+              <span className="rmailidtext">Enter Mail ID</span>
 
+              <div>
+                <input
+                  type="email"
+                  required
+                  className="rmailidbox"
+                  placeholder="MAIL ID"
+                  value={mailid}
+                  onChange={(e) => {
+                    setmailid(e.target.value);
+                    setError("");
+                  }}
+                />
+              </div>
+            </div>
+            <div className="rpass">
+              <span className="rpasstxt">Enter Password</span>
+
+              <div className="">
+                <input
+                  type="password"
+                  required
+                  className="rpassbox"
+                  placeholder="PASSWORD"
+                  value={password}
+                  onChange={(e) => {
+                    setpassword(e.target.value);
+                    setError("");
+                  }}
+                />
+              </div>
+            </div>
             <div>
-              <input
-                type="text"
-                className="usernamebox"
-                placeholder="USERNAME"
-                value={username}
-                onChange={(e) => {
-                  setusername(e.target.value);
-                }}
-              />
+              <button className="registerbtn" type="submit">
+                REGISTER
+              </button>
             </div>
-          </div> */}
-          <div className="rmail">
-            <span className="rmailidtext">Enter Mail ID</span>
-
             <div>
-              <input
-                type="text"
-                className="rmailidbox"
-                placeholder="MAIL ID"
-                value={mailid}
-                onChange={(e) => {
-                  setmailid(e.target.value);
+              <button
+                type="button"
+                className="signupbtn"
+                onClick={() => {
+                  navigate("/");
                 }}
-              />
+              >
+                LOG IN
+              </button>
             </div>
-          </div>
-          <div className="rpass">
-            <span className="rpasstxt">Enter Password</span>
-
-            <div className="">
-              <input
-                type="password"
-                className="rpassbox"
-                placeholder="PASSWORD"
-                value={password}
-                onChange={(e) => {
-                  setpassword(e.target.value);
-                }}
-              />
-            </div>
-          </div>
-          <div>
-            <button className="registerbtn" onClick={HandleSignup}>REGISTER</button>
-          </div>
+            {error && (
+              <div className="invalid">
+                <span>{error}</span>
+              </div>
+            )}
+          </form>
         </div>
       </div>
     </>

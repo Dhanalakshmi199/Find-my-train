@@ -69,26 +69,31 @@ export default function Tbstns({ curpage }) {
   };
   const getcommontrains = () => {
     const results = [];
-    fromsugg.map((item) =>
-      Object.values(item[1]["Trains"]).forEach((t) => {
-        // console.log(t)
-        tosugg.map((tm) =>
-          Object.values(tm[1]["Trains"]).forEach((tmp) => {
-            if (tmp === t) results.push(t);
-          })
-        );
-      })
-    );
+    fromsugg.forEach((item) => {
+      const fromTrains = item[1]?.Trains ? Object.values(item[1].Trains) : [];
+      fromTrains.forEach((t) => {
+        tosugg.forEach((tm) => {
+          const toTrains = tm[1]?.Trains ? Object.values(tm[1].Trains) : [];
+          if (toTrains.includes(t) && !results.includes(t)) {
+            results.push(t);
+          }
+        });
+      });
+    });
     setresulttrains(results);
   };
   const gettime = (tstime, fstime, fsday, tsday) => {
-    const fstarr = fstime.split(":");
-    const tstarr = tstime.split(":");
-    const temp1 = 60 * fstarr[0] + fstarr[1];
-    const temp2 = 60 * tstarr[0] + tstarr[1];
-    var diffInMinutes = temp2 - temp1;
-    diffInMinutes += (tsday - fsday) * 24 * 6000;
-    const hours = Math.floor(diffInMinutes / 6000);
+    if (!tstime || !fstime || tstime === "--" || fstime === "--") return "--";
+    const [fHour, fMin] = fstime.split(":").map(Number);
+    const [tHour, tMin] = tstime.split(":").map(Number);
+    const fromTotal = fHour * 60 + fMin;
+    const toTotal = tHour * 60 + tMin;
+    const dayDiff = (Number(tsday || 1) - Number(fsday || 1)) * 24 * 60;
+    let diffInMinutes = toTotal - fromTotal + dayDiff;
+    if (diffInMinutes < 0) {
+      diffInMinutes += 24 * 60;
+    }
+    const hours = Math.floor(diffInMinutes / 60);
     const minutes = diffInMinutes % 60;
     return (
       (hours < 10 ? "0" + hours : hours) +
@@ -244,60 +249,71 @@ export default function Tbstns({ curpage }) {
                   </span>
                   <span className="clock3">{to}</span>
                 </div>
-                {resulttrains.length === 0 && (
+                {resulttrains.filter(
+                  (t) =>
+                    data2[t]?.[fromcode] &&
+                    data2[t]?.[tocode] &&
+                    data2[t][fromcode].Serial_No <= data2[t][tocode].Serial_No
+                ).length === 0 && (
                   <div className="notfound">
                     <span className="">NO TRAINS FOUND!</span>
                   </div>
                 )}
-                {resulttrains && resulttrains.length > 0 && (
+                {resulttrains.filter(
+                  (t) =>
+                    data2[t]?.[fromcode] &&
+                    data2[t]?.[tocode] &&
+                    data2[t][fromcode].Serial_No <= data2[t][tocode].Serial_No
+                ).length > 0 && (
                   <div className="tbstnsrows">
-                    {resulttrains.map((t) => {
-                      return (
-                        <>
-                          {data2[t][fromcode]["Serial_No"] <=
-                            data2[t][tocode]["Serial_No"] && (
-                            <div className="tbstnseachrow">
-                              <div className="tbstnsrow1">
-                                {t} - {data3[t]["Train_name"]}
+                    {resulttrains
+                      .filter(
+                        (t) =>
+                          data2[t]?.[fromcode] &&
+                          data2[t]?.[tocode] &&
+                          data2[t][fromcode].Serial_No <=
+                            data2[t][tocode].Serial_No
+                      )
+                      .map((t) => (
+                        <div className="tbstnseachrow" key={t}>
+                          <div className="tbstnsrow1">
+                            {t} - {data3[t]?.["Train_name"]}
+                          </div>
+                          <div className="tbstnsrow2">
+                            <div className="tbstnsrow21">
+                              <div className="tbstnsrow211">
+                                {data2[t][fromcode]["Arrival Time"] === "--"
+                                  ? data2[t][fromcode]["Departure Time"]
+                                  : data2[t][fromcode]["Arrival Time"]}
                               </div>
-                              <div className="tbstnsrow2">
-                                <div className="tbstnsrow21">
-                                  <div className="tbstnsrow211">
-                                    {data2[t][fromcode]["Arrival Time"] === "--"
-                                      ? data2[t][fromcode]["Departure Time"]
-                                      : data2[t][fromcode]["Arrival Time"]}
-                                  </div>
-                                  <div className="tbstnsrow212">
-                                    {gettime(
-                                      data2[t][tocode]["Arrival Time"] === "--"
-                                        ? data2[t][tocode]["Departure Time"]
-                                        : data2[t][tocode]["Arrival Time"],
-                                      data2[t][fromcode]["Arrival Time"] ===
-                                        "--"
-                                        ? data2[t][fromcode]["Departure Time"]
-                                        : data2[t][fromcode]["Arrival Time"],
-                                      data2[t][fromcode]["Day"],
-                                      data2[t][tocode]["Day"]
-                                    )}
-                                  </div>
-                                  <div className="tbstnsrow213">
-                                    {data2[t][tocode]["Arrival Time"] === "--"
-                                      ? data2[t][tocode]["Departure Time"]
-                                      : data2[t][tocode]["Arrival Time"]}
-                                  </div>
-                                </div>
-                                <div className="tbstnsrow22">
-                                  {getdays(
-                                    data3[t]["Runs_on"],
-                                    data2[t][fromcode]["Day"]
-                                  )}
-                                </div>
+                              <div className="tbstnsrow212">
+                                {gettime(
+                                  data2[t][tocode]["Arrival Time"] === "--"
+                                    ? data2[t][tocode]["Departure Time"]
+                                    : data2[t][tocode]["Arrival Time"],
+                                  data2[t][fromcode]["Arrival Time"] ===
+                                    "--"
+                                    ? data2[t][fromcode]["Departure Time"]
+                                    : data2[t][fromcode]["Arrival Time"],
+                                  data2[t][fromcode]["Day"],
+                                  data2[t][tocode]["Day"]
+                                )}
+                              </div>
+                              <div className="tbstnsrow213">
+                                {data2[t][tocode]["Arrival Time"] === "--"
+                                  ? data2[t][tocode]["Departure Time"]
+                                  : data2[t][tocode]["Arrival Time"]}
                               </div>
                             </div>
-                          )}
-                        </>
-                      );
-                    })}
+                            <div className="tbstnsrow22">
+                              {getdays(
+                                data3[t]?.["Runs_on"] || {},
+                                data2[t][fromcode]["Day"]
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                   </div>
                 )}
               </div>

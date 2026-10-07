@@ -31,61 +31,63 @@ export default function Login() {
       >
         <div className="x"></div>
         <div className="loginbox">
-          <div className="mail">
-            <span className="mailidtext">Enter Mail ID</span>
+          <form onSubmit={login} style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
+            <div className="mail">
+              <span className="mailidtext">Enter Mail ID</span>
 
+              <div>
+                <input
+                  type="email"
+                  required
+                  className="mailidbox"
+                  placeholder="MAIL ID"
+                  value={mailid}
+                  onChange={(e) => {
+                    setmailid(e.target.value);
+                    seterror(false);
+                  }}
+                />
+              </div>
+            </div>
+            <div className="pass">
+              <span className="passtxt">Enter Password</span>
+
+              <div className="">
+                <input
+                  type="password"
+                  required
+                  className="passbox"
+                  placeholder="PASSWORD"
+                  value={password}
+                  onChange={(e) => {
+                    setpassword(e.target.value);
+                    seterror(false);
+                  }}
+                />
+              </div>
+            </div>
             <div>
-              <input
-                type="text"
-                className="mailidbox"
-                placeholder="MAIL ID"
-                value={mailid}
-                onChange={(e) => {
-                  setmailid(e.target.value);
-                  seterror(false);
+              <button className="loginbtn" type="submit">
+                LOG IN
+              </button>
+            </div>
+            <div>
+              <button
+                type="button"
+                className="signupbtn"
+                onClick={() => {
+                  navigate("/register");
                 }}
-              />
+              >
+                SIGN UP
+              </button>
             </div>
-          </div>
-          <div className="pass">
-            <span className="passtxt">Enter Password</span>
-
-            <div className="">
-              <input
-                type="password"
-                className="passbox"
-                placeholder="PASSWORD"
-                value={password}
-                onChange={(e) => {
-                  setpassword(e.target.value);
-                  seterror(false);
-                }}
-              />
-            </div>
-          </div>
-          {/* <div>
-            <button className="fgpassbtn">forgot password?</button>
-          </div> */}
-          <div>
-            <button className="loginbtn" type="submit" onClick={login}>
-              LOG IN
-            </button>
-          </div>
-          <div>
-            <button
-              className="signupbtn"
-              onClick={() => {
-                navigate("/register");
-              }}
-            >
-              SIGN UP
-            </button>
-          </div>
-          {error && (
-            <div className="invalid">
-              <span className="">Invalid credentials!</span>
-            </div>
-          )}
+            {error && (
+              <div className="invalid">
+                <span className="">Invalid credentials!</span>
+              </div>
+            )}
+          </form>
         </div>
       </div>
     </>

@@ -6,17 +6,12 @@ import "./Tschedule.css";
 import data from "../../Data/Trains_dict.json";
 import data2 from "../../Data/Schedules_dict.json";
 
-export default function Track({ curpage }) {
+export default function Tschedule({ curpage }) {
   const [animation, setAnimation] = useState(false);
-
-  function handleSubmit(event) {
-    event.preventDefault();
-    // perform search logic here
-  }
   const [issearched, setissearched] = useState(false);
   const [validsearch, setvalidsearch] = useState(false);
   const [trainnumber, settrainnumber] = useState("");
-  const [treainscheduleresults, settreainscheduleresults] = useState([]);
+  const [trainscheduleresults, settrainscheduleresults] = useState([]);
   const [trainsugg, settrainsugg] = useState([]);
   const [traindata, settraindata] = useState("");
   const gettrains = (value) => {
@@ -34,7 +29,7 @@ export default function Track({ curpage }) {
     const results = Object.entries(data2).filter(
       ([key, obj]) => trainnumber && key.startsWith(trainnumber)
     );
-    settreainscheduleresults(results);
+    settrainscheduleresults(results);
   };
 
   const [showModal, setShowModal] = useState(false);
@@ -82,9 +77,9 @@ export default function Track({ curpage }) {
               <div className="tscheduledata">
                 {issearched &&
                   validsearch &&
-                  treainscheduleresults &&
+                  trainscheduleresults &&
                   trainsugg.map((item) => (
-                    <div className="tschedulerows">
+                    <div className="tschedulerows" key={item[0]}>
                       <div className="row row1">
                         Train Number : <span className="rowt">{item[0]}</span>
                       </div>
@@ -206,82 +201,71 @@ export default function Track({ curpage }) {
                       </tr>
                     </thead>
                   )}
-                  {issearched &&
-                    validsearch &&
-                    treainscheduleresults &&
-                    treainscheduleresults.map(([key, obj]) =>
-                      Object.entries(obj).map((p) => (
-                        <tbody>
+                  {issearched && validsearch && trainscheduleresults && (
+                    <tbody>
+                      {trainscheduleresults.map(([key, obj]) =>
+                        Object.entries(obj).map(([stnCode, p]) => (
                           <tr
+                            key={p["Serial_No"] || stnCode}
                             className={`whichrow ${
-                              p[1]["Serial_No"] % 2 !== 0 ? "oddrow" : "evenrow"
+                              p["Serial_No"] % 2 !== 0 ? "oddrow" : "evenrow"
                             }`}
                           >
                             <td>
-                              {" "}
                               <span className="body body1">
-                                {p[1]["Serial_No"]}
+                                {p["Serial_No"]}
                               </span>
                             </td>
                             <td>
-                              {" "}
-                              <span className="body body2">{p[0]} </span>
+                              <span className="body body2">{stnCode} </span>
                             </td>
                             <td>
-                              {" "}
                               <span className="body body3">
-                                {p[1]["Station Name"]}
+                                {p["Station Name"]}
                               </span>
                             </td>
                             <td>
-                              {" "}
                               <span className="body body4">
-                                {p[1]["Arrival Time"]}
+                                {p["Arrival Time"]}
                               </span>
                             </td>
                             <td>
-                              {" "}
                               <span className="body body5">
-                                {p[1]["Departure Time"]}
+                                {p["Departure Time"]}
                               </span>
                             </td>
                             <td>
-                              {" "}
                               <span className="body body6">
-                                {p[1]["Halt Time"]}Mins
+                                {p["Halt Time"]}Mins
                               </span>
                             </td>
                             <td>
-                              {" "}
                               <span className="body body7">
-                                {p[1]["Distance"]}KM
+                                {p["Distance"]}KM
                               </span>
                             </td>
                             <td>
-                              {" "}
-                              <span className="body body8">{p[1]["Day"]}</span>
+                              <span className="body body8">{p["Day"]}</span>
                             </td>
                           </tr>
-                        </tbody>
-                      ))
-                    )}
+                        ))
+                      )}
+                    </tbody>
+                  )}
                 </table>
               </div>
             </div>
           </div>
         )}
         <div
-          onSubmit={handleSubmit}
           className={`Tschedulepage ${animation ? "animated12" : ""}`}
         >
           <div
-            onSubmit={handleSubmit}
             className={`text2 ${animation ? "animated52" : ""}`}
           >
             Enter Train number or Train name :
           </div>
           <div
-            onSubmit={handleSubmit}
             className={`tscheduleform ${animation ? "animated22" : ""}`}
             role="search"
             autoComplete="off"
@@ -333,7 +317,6 @@ export default function Track({ curpage }) {
               </div>
             </div>
             <button
-              onSubmit={handleSubmit}
               className={`trainsubmitbuttontschedule ${
                 animation ? "animated42" : ""
               }`}
