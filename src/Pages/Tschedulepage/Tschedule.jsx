@@ -6,6 +6,7 @@ import "./Tschedule.css";
 import data from "../../Data/Trains_dict.json";
 import data2 from "../../Data/Schedules_dict.json";
 import axios from "axios";
+import { RAPIDAPI_KEY, RAPIDAPI_HOST } from "../../api/config";
 
 export default function Tschedule({ curpage }) {
   const [animation, setAnimation] = useState(false);
@@ -17,6 +18,7 @@ export default function Tschedule({ curpage }) {
   const [traindata, settraindata] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const searchTimeoutRef = useRef(null);
 
   const gettrains = (value) => {
@@ -41,9 +43,8 @@ export default function Tschedule({ curpage }) {
           .get("https://irctc1.p.rapidapi.com/api/v1/searchTrain", {
             params: { query: searchTerm },
             headers: {
-              "X-RapidAPI-Key":
-                "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
-              "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
+              "X-RapidAPI-Key": RAPIDAPI_KEY,
+              "X-RapidAPI-Host": RAPIDAPI_HOST,
             },
           })
           .then((res) => {
@@ -97,6 +98,7 @@ export default function Tschedule({ curpage }) {
     if (!tNo) return;
     setLoading(true);
     setError(false);
+    setErrorMessage("");
 
     // 1. Check local static schedules first
     const localResults = Object.entries(data2).filter(([key]) =>
@@ -113,9 +115,8 @@ export default function Tschedule({ curpage }) {
       .get("https://irctc1.p.rapidapi.com/api/v1/getTrainSchedule", {
         params: { trainNo: tNo },
         headers: {
-          "X-RapidAPI-Key":
-            "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
-          "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
+          "X-RapidAPI-Key": RAPIDAPI_KEY,
+          "X-RapidAPI-Host": RAPIDAPI_HOST,
         },
       })
       .then((res) => {
@@ -195,11 +196,19 @@ export default function Tschedule({ curpage }) {
           settrainscheduleresults([[tNo, scheduleObj]]);
         } else {
           setError(true);
+          setErrorMessage(`Unable to fetch schedule for train ${tNo}. Please verify the train number.`);
         }
       })
       .catch((err) => {
         setLoading(false);
         setError(true);
+        if (err.response?.status === 429) {
+          setErrorMessage(
+            "RapidAPI free monthly quota exceeded. You can configure your free key via REACT_APP_RAPIDAPI_KEY."
+          );
+        } else {
+          setErrorMessage(`Unable to fetch schedule for train ${tNo}. Please verify the train number.`);
+        }
         console.error(err);
       });
   };
@@ -255,7 +264,7 @@ export default function Tschedule({ curpage }) {
               )}
               {error && !loading && (
                 <div style={{ color: "#ff8b8b", textAlign: "center", padding: "20px" }}>
-                  Unable to fetch schedule for train {trainnumber}. Please verify the train number.
+                  {errorMessage || `Unable to fetch schedule for train ${trainnumber}. Please verify the train number.`}
                 </div>
               )}
               {!loading && !error && (

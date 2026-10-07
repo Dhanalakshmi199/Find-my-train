@@ -12,6 +12,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 // import { useInView } from "react-intersection-observer";
 import { useSpeechSynthesis } from "../../hooks/useSpeechSynthesis";
 import axios from "axios";
+import { RAPIDAPI_KEY, RAPIDAPI_HOST } from "../../api/config";
 
 export default function Track({ curpage }) {
   const [animation, setAnimation] = useState(false);
@@ -33,6 +34,7 @@ export default function Track({ curpage }) {
   const [refresh, setrefresh] = useState(false);
   const [ds, setds] = useState({});
   const [error, seterror] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const searchTimeoutRef = useRef(null);
 
@@ -42,14 +44,14 @@ export default function Track({ curpage }) {
     if (!trainToFetch) return;
     setLoading(true);
     seterror(false);
+    setErrorMessage("");
     const options = {
       method: "GET",
       url: "https://irctc1.p.rapidapi.com/api/v1/liveTrainStatus",
       params: { trainNo: trainToFetch, startDay: travelday },
       headers: {
-        "X-RapidAPI-Key":
-          "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
-        "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
+        "X-RapidAPI-Key": RAPIDAPI_KEY,
+        "X-RapidAPI-Host": RAPIDAPI_HOST,
       },
     };
     axios
@@ -61,6 +63,13 @@ export default function Track({ curpage }) {
       .catch(function (error) {
         seterror(true);
         setLoading(false);
+        if (error.response?.status === 429) {
+          setErrorMessage(
+            "RapidAPI free monthly quota exceeded. You can configure your free key via REACT_APP_RAPIDAPI_KEY."
+          );
+        } else {
+          setErrorMessage(error.response?.data?.message || "An error occurred, please try again later.");
+        }
         console.error(error);
       });
   };
@@ -94,9 +103,8 @@ export default function Track({ curpage }) {
           .get("https://irctc1.p.rapidapi.com/api/v1/searchTrain", {
             params: { query: searchTerm },
             headers: {
-              "X-RapidAPI-Key":
-                "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
-              "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
+              "X-RapidAPI-Key": RAPIDAPI_KEY,
+              "X-RapidAPI-Host": RAPIDAPI_HOST,
             },
           })
           .then((res) => {
@@ -227,7 +235,7 @@ export default function Track({ curpage }) {
               <div className="msg">Loading live train status...</div>
             )}
             {issearched && !loading && error && (
-              <div className="msg">An error occurred, please try again later</div>
+              <div className="msg">{errorMessage || "An error occurred, please try again later"}</div>
             )}
             {issearched && !loading && !error && (
               <div className="">

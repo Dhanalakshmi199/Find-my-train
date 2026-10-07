@@ -9,6 +9,7 @@ import SwapVert from "@mui/icons-material/SwapVert";
 import SearchIcon from "@mui/icons-material/Search";
 import { ReportProblem } from "@mui/icons-material";
 import axios from "axios";
+import { RAPIDAPI_KEY, RAPIDAPI_HOST } from "../../api/config";
 
 export default function Tbstns({ curpage }) {
   const [issearched, setissearched] = useState(false);
@@ -111,9 +112,8 @@ export default function Tbstns({ curpage }) {
             dateOfJourney: today,
           },
           headers: {
-            "X-RapidAPI-Key":
-              "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
-            "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
+            "X-RapidAPI-Key": RAPIDAPI_KEY,
+            "X-RapidAPI-Host": RAPIDAPI_HOST,
           },
         })
         .then((res) => {
