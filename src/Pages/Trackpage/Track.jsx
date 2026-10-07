@@ -34,14 +34,18 @@ export default function Track({ curpage }) {
   const [ds, setds] = useState({});
   const [error, seterror] = useState(false);
 
-  const getlivetraindata = (event) => {
+  const searchTimeoutRef = useRef(null);
+
+  const getlivetraindata = (event, targetTrain) => {
     if (event) event.preventDefault();
+    const trainToFetch = targetTrain || trainnumber || traindata.match(/\b\d{5}\b/)?.[0];
+    if (!trainToFetch) return;
     setLoading(true);
     seterror(false);
     const options = {
       method: "GET",
       url: "https://irctc1.p.rapidapi.com/api/v1/liveTrainStatus",
-      params: { trainNo: trainnumber, startDay: travelday },
+      params: { trainNo: trainToFetch, startDay: travelday },
       headers: {
         "X-RapidAPI-Key":
           "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
@@ -68,15 +72,59 @@ export default function Track({ curpage }) {
   const [travelday, settravelday] = useState(0);
   const [stpno, setstpno] = useState(0);
   const [wantspal, setwantspal] = useState(false);
+
   const gettrains = (value) => {
-    const searchTerm = value.toUpperCase();
-    const results = Object.entries(data).filter(([key, obj]) => {
+    const searchTerm = value.toUpperCase().trim();
+    if (!searchTerm) {
+      settrainsugg([]);
+      return;
+    }
+    const localResults = Object.entries(data).filter(([key, obj]) => {
       return (
-        searchTerm &&
-        (key.startsWith(searchTerm) || obj.Train_name.startsWith(searchTerm))
+        key.startsWith(searchTerm) || obj.Train_name.toUpperCase().includes(searchTerm)
       );
     });
-    settrainsugg(results);
+    settrainsugg(localResults);
+
+    // Live IRCTC search for all trains across India
+    if (searchTerm.length >= 3) {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = setTimeout(() => {
+        axios
+          .get("https://irctc1.p.rapidapi.com/api/v1/searchTrain", {
+            params: { query: searchTerm },
+            headers: {
+              "X-RapidAPI-Key":
+                "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
+              "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
+            },
+          })
+          .then((res) => {
+            if (res.data && res.data.status && Array.isArray(res.data.data)) {
+              const apiResults = res.data.data.map((t) => [
+                t.train_number,
+                {
+                  Train_name: t.train_name || t.eng_train_name || "",
+                  From_station: t.src_stn_code || t.src_stn_name || "",
+                  To_station: t.dstn_stn_code || t.dstn_stn_name || "",
+                },
+              ]);
+              settrainsugg((prev) => {
+                const seen = new Set(prev.map((item) => item[0]));
+                const merged = [...prev];
+                apiResults.forEach((item) => {
+                  if (!seen.has(item[0])) {
+                    seen.add(item[0]);
+                    merged.push(item);
+                  }
+                });
+                return merged;
+              });
+            }
+          })
+          .catch(() => {});
+      }, 300);
+    }
   };
   const [showModal, setShowModal] = useState(false);
   const myModal = () => {
@@ -682,14 +730,27 @@ export default function Track({ curpage }) {
               className={`trainsubmitbutton ${animation ? "animated4" : ""}`}
               type="submit"
               onClick={(event) => {
-                !validsearch && setShowModal(true);
-                validsearch && setAnimation(true);
-                validsearch && setissearched(true);
-                validsearch && handleButtonClick();
-                validsearch && seterror(false);
-                validsearch && getlivetraindata(event);
+                let targetTrain = trainnumber;
+                let isValid = validsearch;
+                if (!isValid) {
+                  const match = traindata.match(/\b\d{5}\b/);
+                  if (match) {
+                    targetTrain = match[0];
+                    settrainnumber(targetTrain);
+                    isValid = true;
+                    setvalidsearch(true);
+                  }
+                }
+                if (!isValid) {
+                  setShowModal(true);
+                  return;
+                }
+                setAnimation(true);
+                setissearched(true);
+                handleButtonClick();
+                seterror(false);
+                getlivetraindata(event, targetTrain);
                 setrefresh(false);
-                // console.log(travelday);
               }}
             >
               <SearchIcon id="searchicon" />

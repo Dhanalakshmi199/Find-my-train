@@ -8,6 +8,7 @@ import { AccessTime, SwapHoriz } from "@mui/icons-material";
 import SwapVert from "@mui/icons-material/SwapVert";
 import SearchIcon from "@mui/icons-material/Search";
 import { ReportProblem } from "@mui/icons-material";
+import axios from "axios";
 
 export default function Tbstns({ curpage }) {
   const [issearched, setissearched] = useState(false);
@@ -22,6 +23,9 @@ export default function Tbstns({ curpage }) {
   const [tocode, settocode] = useState("");
   const [animation, setAnimation] = useState(false);
   const [resulttrains, setresulttrains] = useState([]);
+  const [liveTrains, setLiveTrains] = useState([]);
+  const [loading, setLoading] = useState(false);
+
   const Handleonclick = () => {
     const temp = from;
     const temp2 = fromcode;
@@ -33,9 +37,10 @@ export default function Tbstns({ curpage }) {
     getfromstations(temp3, true);
     gettostations(temp2, true);
   };
+
   const getfromstations = (value, t) => {
     if (t) {
-      const results = Object.entries(data).filter(([key, obj]) => {
+      const results = Object.entries(data).filter(([key]) => {
         return value.toUpperCase() && key === value.toUpperCase();
       });
       setfromsugg(results);
@@ -50,9 +55,10 @@ export default function Tbstns({ curpage }) {
       setfromsugg(results);
     }
   };
+
   const gettostations = (value, t) => {
     if (t) {
-      const results = Object.entries(data).filter(([key, obj]) => {
+      const results = Object.entries(data).filter(([key]) => {
         return value.toUpperCase() && key === value.toUpperCase();
       });
       settosugg(results);
@@ -67,7 +73,10 @@ export default function Tbstns({ curpage }) {
       settosugg(results);
     }
   };
-  const getcommontrains = () => {
+
+  const getcommontrains = (fCode, tCode) => {
+    const srcCode = fCode || fromcode;
+    const dstCode = tCode || tocode;
     const results = [];
     fromsugg.forEach((item) => {
       const fromTrains = item[1]?.Trains ? Object.values(item[1].Trains) : [];
@@ -81,7 +90,49 @@ export default function Tbstns({ curpage }) {
       });
     });
     setresulttrains(results);
+
+    // Filter valid direction in local dataset
+    const validLocal = results.filter(
+      (t) =>
+        data2[t]?.[srcCode] &&
+        data2[t]?.[dstCode] &&
+        data2[t][srcCode].Serial_No <= data2[t][dstCode].Serial_No
+    );
+
+    // If local dataset has no trains in valid direction, query live IRCTC API
+    if (validLocal.length === 0 && srcCode && dstCode) {
+      setLoading(true);
+      const today = new Date().toISOString().split("T")[0];
+      axios
+        .get("https://irctc1.p.rapidapi.com/api/v3/trainBetweenStations", {
+          params: {
+            fromStationCode: srcCode,
+            toStationCode: dstCode,
+            dateOfJourney: today,
+          },
+          headers: {
+            "X-RapidAPI-Key":
+              "a0519be863msh55563f3caa37a19p13d4c6jsn3b8b75af7ba0",
+            "X-RapidAPI-Host": "irctc1.p.rapidapi.com",
+          },
+        })
+        .then((res) => {
+          setLoading(false);
+          if (res.data && res.data.status && Array.isArray(res.data.data)) {
+            setLiveTrains(res.data.data);
+          } else {
+            setLiveTrains([]);
+          }
+        })
+        .catch(() => {
+          setLoading(false);
+          setLiveTrains([]);
+        });
+    } else {
+      setLiveTrains([]);
+    }
   };
+
   const gettime = (tstime, fstime, fsday, tsday) => {
     if (!tstime || !fstime || tstime === "--" || fstime === "--") return "--";
     const [fHour, fMin] = fstime.split(":").map(Number);
@@ -102,6 +153,7 @@ export default function Tbstns({ curpage }) {
       "Hrs"
     );
   };
+
   const getdays = (runson, fsdayno) => {
     var ondays = { M: 0, T: 0, W: 0, THU: 0, F: 0, S: 0, SUN: 0 };
     if (runson["mon"] === 1) {
@@ -194,6 +246,58 @@ export default function Tbstns({ curpage }) {
     );
   };
 
+  const getDaysFromArray = (runDaysArr = []) => {
+    const daysSet = new Set(runDaysArr.map((d) => String(d).toLowerCase()));
+    const ondays = {
+      M: daysSet.has("mon") ? 1 : 0,
+      T: daysSet.has("tue") ? 1 : 0,
+      W: daysSet.has("wed") ? 1 : 0,
+      THU: daysSet.has("thu") ? 1 : 0,
+      F: daysSet.has("fri") ? 1 : 0,
+      S: daysSet.has("sat") ? 1 : 0,
+      SUN: daysSet.has("sun") ? 1 : 0,
+    };
+    return (
+      <div className="">
+        <span
+          className={`tbstnsdays ${ondays.M === 1 ? "greentbs" : "blacktbs"}`}
+        >
+          M
+        </span>
+        <span
+          className={`tbstnsdays ${ondays.T === 1 ? "greentbs" : "blacktbs"}`}
+        >
+          T
+        </span>
+        <span
+          className={`tbstnsdays ${ondays.W === 1 ? "greentbs" : "blacktbs"}`}
+        >
+          W
+        </span>
+        <span
+          className={`tbstnsdays ${ondays.THU === 1 ? "greentbs" : "blacktbs"}`}
+        >
+          T
+        </span>
+        <span
+          className={`tbstnsdays ${ondays.F === 1 ? "greentbs" : "blacktbs"}`}
+        >
+          F
+        </span>
+        <span
+          className={`tbstnsdays ${ondays.S === 1 ? "greentbs" : "blacktbs"}`}
+        >
+          S
+        </span>
+        <span
+          className={`tbstnsdays ${ondays.SUN === 1 ? "greentbs" : "blacktbs"}`}
+        >
+          S
+        </span>
+      </div>
+    );
+  };
+
   const [showModal, setShowModal] = useState(false);
   const myModal = () => {
     return (
@@ -215,6 +319,14 @@ export default function Tbstns({ curpage }) {
       return () => clearTimeout(timeoutId);
     }
   }, [showModal]);
+
+  const validDirectionLocalTrains = resulttrains.filter(
+    (t) =>
+      data2[t]?.[fromcode] &&
+      data2[t]?.[tocode] &&
+      data2[t][fromcode].Serial_No <= data2[t][tocode].Serial_No
+  );
+
   return (
     <>
       <Navbar curpage={curpage} />
@@ -249,73 +361,96 @@ export default function Tbstns({ curpage }) {
                   </span>
                   <span className="clock3">{to}</span>
                 </div>
-                {resulttrains.filter(
-                  (t) =>
-                    data2[t]?.[fromcode] &&
-                    data2[t]?.[tocode] &&
-                    data2[t][fromcode].Serial_No <= data2[t][tocode].Serial_No
-                ).length === 0 && (
-                  <div className="notfound">
-                    <span className="">NO TRAINS FOUND!</span>
+                {loading && (
+                  <div
+                    style={{
+                      color: "#fff",
+                      textAlign: "center",
+                      padding: "20px",
+                    }}
+                  >
+                    Loading trains between stations...
                   </div>
                 )}
-                {resulttrains.filter(
-                  (t) =>
-                    data2[t]?.[fromcode] &&
-                    data2[t]?.[tocode] &&
-                    data2[t][fromcode].Serial_No <= data2[t][tocode].Serial_No
-                ).length > 0 && (
+                {!loading &&
+                  validDirectionLocalTrains.length === 0 &&
+                  liveTrains.length === 0 && (
+                    <div className="notfound">
+                      <span className="">NO TRAINS FOUND!</span>
+                    </div>
+                  )}
+                {!loading && validDirectionLocalTrains.length > 0 && (
                   <div className="tbstnsrows">
-                    {resulttrains
-                      .filter(
-                        (t) =>
-                          data2[t]?.[fromcode] &&
-                          data2[t]?.[tocode] &&
-                          data2[t][fromcode].Serial_No <=
-                            data2[t][tocode].Serial_No
-                      )
-                      .map((t) => (
-                        <div className="tbstnseachrow" key={t}>
+                    {validDirectionLocalTrains.map((t) => (
+                      <div className="tbstnseachrow" key={t}>
+                        <div className="tbstnsrow1">
+                          {t} - {data3[t]?.["Train_name"]}
+                        </div>
+                        <div className="tbstnsrow2">
+                          <div className="tbstnsrow21">
+                            <div className="tbstnsrow211">
+                              {data2[t][fromcode]["Arrival Time"] === "--"
+                                ? data2[t][fromcode]["Departure Time"]
+                                : data2[t][fromcode]["Arrival Time"]}
+                            </div>
+                            <div className="tbstnsrow212">
+                              {gettime(
+                                data2[t][tocode]["Arrival Time"] === "--"
+                                  ? data2[t][tocode]["Departure Time"]
+                                  : data2[t][tocode]["Arrival Time"],
+                                data2[t][fromcode]["Arrival Time"] === "--"
+                                  ? data2[t][fromcode]["Departure Time"]
+                                  : data2[t][fromcode]["Arrival Time"],
+                                data2[t][fromcode]["Day"],
+                                data2[t][tocode]["Day"]
+                              )}
+                            </div>
+                            <div className="tbstnsrow213">
+                              {data2[t][tocode]["Arrival Time"] === "--"
+                                ? data2[t][tocode]["Departure Time"]
+                                : data2[t][tocode]["Arrival Time"]}
+                            </div>
+                          </div>
+                          <div className="tbstnsrow22">
+                            {getdays(
+                              data3[t]?.["Runs_on"] || {},
+                              data2[t][fromcode]["Day"]
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {!loading &&
+                  validDirectionLocalTrains.length === 0 &&
+                  liveTrains.length > 0 && (
+                    <div className="tbstnsrows">
+                      {liveTrains.map((item) => (
+                        <div className="tbstnseachrow" key={item.train_number}>
                           <div className="tbstnsrow1">
-                            {t} - {data3[t]?.["Train_name"]}
+                            {item.train_number} - {item.train_name}
                           </div>
                           <div className="tbstnsrow2">
                             <div className="tbstnsrow21">
                               <div className="tbstnsrow211">
-                                {data2[t][fromcode]["Arrival Time"] === "--"
-                                  ? data2[t][fromcode]["Departure Time"]
-                                  : data2[t][fromcode]["Arrival Time"]}
+                                {item.from_std || item.from_sta || "--"}
                               </div>
                               <div className="tbstnsrow212">
-                                {gettime(
-                                  data2[t][tocode]["Arrival Time"] === "--"
-                                    ? data2[t][tocode]["Departure Time"]
-                                    : data2[t][tocode]["Arrival Time"],
-                                  data2[t][fromcode]["Arrival Time"] ===
-                                    "--"
-                                    ? data2[t][fromcode]["Departure Time"]
-                                    : data2[t][fromcode]["Arrival Time"],
-                                  data2[t][fromcode]["Day"],
-                                  data2[t][tocode]["Day"]
-                                )}
+                                {item.duration || "--"} Hrs
                               </div>
                               <div className="tbstnsrow213">
-                                {data2[t][tocode]["Arrival Time"] === "--"
-                                  ? data2[t][tocode]["Departure Time"]
-                                  : data2[t][tocode]["Arrival Time"]}
+                                {item.to_sta || item.to_std || "--"}
                               </div>
                             </div>
                             <div className="tbstnsrow22">
-                              {getdays(
-                                data3[t]?.["Runs_on"] || {},
-                                data2[t][fromcode]["Day"]
-                              )}
+                              {getDaysFromArray(item.run_days)}
                             </div>
                           </div>
                         </div>
                       ))}
-                  </div>
-                )}
+                    </div>
+                  )}
               </div>
             )}
         </div>
@@ -332,10 +467,8 @@ export default function Tbstns({ curpage }) {
                   }`}
                   type="search"
                   placeholder="Station Code/Name"
-                  // id={`fromstationcode ${animation ? "animated63" : ""}`}
                   value={from}
                   autoComplete="off"
-                  // onClick={setpallette(1)}
                   onChange={(event) => {
                     setissearched(false);
                     setvalidfromsearch(false);
@@ -388,10 +521,8 @@ export default function Tbstns({ curpage }) {
                   className={`tostationcode ${animation ? "animated63t" : ""}`}
                   type="search"
                   placeholder="Station Code/Name"
-                  //id="tostationcode"
                   value={to}
                   autoComplete="off"
-                  // onClick={setpallette(2)}
                   onChange={(event) => {
                     setShowModal(false);
                     setissearched(false);
